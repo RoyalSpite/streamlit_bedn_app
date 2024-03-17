@@ -8,8 +8,8 @@ import numpy as np
 
 # mongodb+srv://siriwutthesorcerer:vkd5D8LtnyWw7JCl@image-test.kv0abp0.mongodb.net/
 
-st.write(f"username : {st.secretes['db_username']}")
-st.write(f"password : {st.secretes['db_pswd']}")
+st.write(f"username : {st.secrets['db_username']}")
+st.write(f"password : {st.secrets['db_pswd']}")
 
 # @st.cache_resource
 # def init_connection():
