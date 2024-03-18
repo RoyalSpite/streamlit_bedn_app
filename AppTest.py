@@ -1,6 +1,5 @@
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
-from bson.timestamp import Timestamp
 import datetime as dt
 from PIL import Image
 import io

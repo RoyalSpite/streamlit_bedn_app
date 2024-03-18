@@ -23,7 +23,7 @@ def query(date = dt.date.today()):
     collection = database[st.secrets["mongo"]["col"]]
     
     _from = dt.datetime.strptime(str(date), '%Y-%m-%d')
-    _to = _from.replace(hour=23,minute=59,second=59)
+    _to = _from.replace(hour=23,minute=59,second=59,microsecond=999)
         
     criteria = { "date": {"$gte": _from, "$lte": _to } }
 
@@ -73,7 +73,7 @@ with col2:
         filtered_array = img_array
     else:           
         _datetime_from = dt.datetime.strptime(str(date), '%Y-%m-%d').replace(hour=time)
-        _datetime_to = _datetime_from.replace(minute=59,second=59)
+        _datetime_to = _datetime_from.replace(minute=59,second=59, microsecond=999)
             
         filtered_array = list(filter(
             lambda elem: (elem['date'] >= _datetime_from) and (elem['date'] <= _datetime_to),
