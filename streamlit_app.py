@@ -87,8 +87,8 @@ with col2:
 
             disp_date = img_data['date']
                 
-            disp_text = f'{disp_date.day}/{disp_date.month}/{disp_date.year + 543}'
-            disp_time = f'เวลา {disp_date.hour}:{disp_date.minute}:{disp_date.second}'
+            disp_text = f'{disp_date.strftime("%d/%m")}/{disp_date.year + 543}'
+            disp_time = f'เวลา {disp_date.strftime("%H:%M:%S")}'
                     
             with st.expander(f'{disp_text} {disp_time}'):
                 st.image(img_data['img'])         
