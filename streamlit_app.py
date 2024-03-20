@@ -1,94 +1,64 @@
 import streamlit as st
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
-from bson.timestamp import Timestamp
-import datetime as dt
-from dateutil.relativedelta import relativedelta 
-import numpy as np
-
-# st.write(f"username : {st.secrets['db_username']}")
-# st.write(f"password : {st.secrets['db_pswd']}")
+from time import sleep
+import bcrypt
 
 @st.cache_resource
 def init_connection():
     global img_array
     return MongoClient({st.secrets["mongo"]["uri"]}, server_api=ServerApi('1'))
 
-client = init_connection()
-
-@st.cache_data
-def query(date = dt.date.today()):
+if "client" not in st.session_state:
+    st.session_state.client = init_connection()
     
-    database = client[st.secrets["mongo"]["col"]]
-    collection = database[st.secrets["mongo"]["col"]]
+if "user_set" not in st.session_state:
+    database = st.session_state.client[st.secrets["mongo"]["col"]]
+    collection = database[st.secrets["mongo"]["user"]]
+    st.session_state.user_set = list(collection.find())
     
-    _from = dt.datetime.strptime(str(date), '%Y-%m-%d')
-    _to = _from.replace(hour=23,minute=59,second=59,microsecond=999)
-        
-    criteria = { "date": {"$gte": _from, "$lte": _to } }
+st.header("ยินดีต้อนรับเข้าสู่ระบบแจ้งเตือนและตรวจจับการรุกล้ำของรถขุด", divider='gray')
+st.caption("Backhoe's Encroachment Detection and Notification System")
 
-    return list(collection.find(criteria))
-
-## ---------- Application --------------
-st.header("Backhoe Encroachment Visualizer")
-
-col1, col2 = st.columns([0.3,0.7])
-
-with col1:
-    with st.container(border=True):
-            
-        month_range = 3
-                
-        dateNow = dt.datetime.now()
-        datePrev3 = dateNow - relativedelta(months = month_range)
-        dateNext3 = dateNow
-        
-        date = st.date_input(
-            "เลือกวันที่",
-            value = dt.datetime.now(),
-            min_value = datePrev3,
-            max_value = dateNow,
-            format = "DD.MM.YYYY",
-        )
-        
-        AllDay = st.toggle('ดูตลอดทั้งวัน', value=False)
-            
-        time = st.slider("เลือกช่วงชั่วโมง",
-            min_value=0,max_value=23,step=1, value=0, 
-            disabled=AllDay
-        )
-        
-        if not AllDay:
-            st.write(f'เลือกในช่วง {time}:00 - {time}:59')
-        
-        
-        # t = st.time_input('เลือกช่วงเวลา', dt.datetime.now())
-            
-with col2:
-    
-    img_array = query(date)
-    filtered_array = list()
-    
-    if AllDay:
-        filtered_array = img_array
-    else:           
-        _datetime_from = dt.datetime.strptime(str(date), '%Y-%m-%d').replace(hour=time)
-        _datetime_to = _datetime_from.replace(minute=59,second=59, microsecond=999)
-            
-        filtered_array = list(filter(
-            lambda elem: (elem['date'] >= _datetime_from) and (elem['date'] <= _datetime_to),
-            img_array
-        ))
-            
-    if len(filtered_array) == 0:
-        st.container(border=True).write("ไม่มีข้อมูล")
+def authentication():
+    user_dict = list(filter(lambda user: user["username"] == usrname, st.session_state.user_set))
+    if len(user_dict) == 0:
+        st.session_state.aut_complete = False
     else:
-        for img_data in filtered_array:            
+        st.session_state.aut_complete = bcrypt.checkpw(bytes(pswr,'utf-8'), user_dict[0]['password'])
 
-            disp_date = img_data['date']
-                
-            disp_text = f'{disp_date.strftime("%d/%m")}/{disp_date.year + 543}'
-            disp_time = f'เวลา {disp_date.strftime("%H:%M:%S")}'
-                    
-            with st.expander(f'{disp_text} {disp_time}'):
-                st.image(img_data['img'])         
+with st.form(key="Login",border=True):
+    
+    usrname = st.text_input("กรอกชื่อผู้ใช้")
+    
+    pswr = st.text_input("กรอกรหัสผ่าน", type="password")
+    
+    if 'aut_complete' in st.session_state:
+
+        if len(usrname) == 0 or len(pswr) == 0:
+            st.error("⚠️ กรุณากรอกชื่อ / รหัสผ่าน")
+        else:
+            authentication()
+            if st.session_state.aut_complete == False:
+                st.error("❌ ชื่อผู้ใช้ / รหัสผ่านไม่ถูกต้อง")
+            else:
+                st.session_state.login_usrname = usrname
+                del st.session_state.user_set
+                del st.session_state.aut_complete
+                st.success("✔️ เข้าสู่ระบบสำเร็จ")
+                sleep(1)
+                st.switch_page("pages/streamlit_vis.py")
+    else:
+        st.session_state.aut_complete = False
+    
+    login_submit = st.form_submit_button("เข้าสู่ระบบ", use_container_width=True, 
+        type="primary",disabled=st.session_state.aut_complete
+    )
+    
+signin_click = st.button(
+    "ลงทะเบียน", use_container_width=True, disabled=st.session_state.aut_complete
+)
+
+if signin_click:
+    del st.session_state.aut_complete
+    st.switch_page("pages/streamlit_signin.py")
