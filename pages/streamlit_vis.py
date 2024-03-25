@@ -214,4 +214,7 @@ with st.sidebar:
     
     with st.popover(label="ออกจากระบบ", use_container_width=True):
         st.markdown("ยืนยันการออกจากระบบ?")
-        logout = st.button("ใช่" , use_container_width=True, on_click=back_to_login)
+        logout = st.button("ใช่" , use_container_width=True)
+        
+        if logout:
+            back_to_login()
