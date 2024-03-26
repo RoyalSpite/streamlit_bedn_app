@@ -29,7 +29,7 @@ def authentication():
 
 with st.form(key="Login",border=True):
     
-    mail_input = st.text_input("กรอกอีเมลล์ที่ใช้ลงทะเบียน")
+    mail_input = st.text_input("กรอกอีเมลล์")
     
     pswr = st.text_input("กรอกรหัสผ่าน", type="password")
     

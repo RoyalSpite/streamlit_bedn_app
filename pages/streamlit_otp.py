@@ -56,7 +56,7 @@ with st.form('otp',border=True):
         type="primary"
     )
 
-with st.popover("ยกเลิกการส่ง OTP", use_container_width=True):
+with st.popover("ยกเลิก", use_container_width=True):
     st.markdown("ต้องการยกเลิกการกรอก OTP? ถ้าต้องการกู้รหัสผ่าน จะต้องขอรหัส OTP ใหม่")
     login_button = st.button("กลับไปหน้าเข้าสู่ระบบ", use_container_width=True)
     

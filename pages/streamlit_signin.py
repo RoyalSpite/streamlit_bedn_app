@@ -61,7 +61,7 @@ with st.form("signin", border=True):
                 set_auth_state("email_valid", True)
         
     new_pswd = st.text_input("กรอกรหัสผ่าน",type="password", 
-                help="รหัสผ่านควรยาวมากกว่า 6 ตัวอักษร")
+                help="รหัสผ่านต้องยาวไม่ต่ำกว่า 6 ตัวอักษร")
     
     con_pswd = st.text_input("ยืนยันรหัสผ่าน",type="password")
     
@@ -71,6 +71,9 @@ with st.form("signin", border=True):
         if (len(new_pswd) == 0):
             st.error("❌ กรุณากรอกรหัสผ่าน")
             set_auth_state("pswd_valid", False)
+        elif (len(new_pswd) > 6):
+            st.error("❌ รหัสผ่านต้องยาวไม่ต่ำกว่า 6 ตัวอักษร")
+            set_auth_state("pswd_valid", False)           
         else:
             if " " in new_pswd:
                 st.error("❌ รหัสผ่านใหม่ต้องไม่มีช่องว่าง")
