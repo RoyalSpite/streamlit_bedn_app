@@ -10,8 +10,8 @@ import pandas as pd
 #     global img_array
 #     return MongoClient({st.secrets["mongo"]["uri"]}, server_api=ServerApi('1'))
 
-if "client" not in st.session_state:
-    st.session_state.client = init_connection()
+# if "client" not in st.session_state:
+#     st.session_state.client = init_connection()
 
 if "curr_date_index" not in st.session_state:
     st.session_state.curr_date_index = 0
