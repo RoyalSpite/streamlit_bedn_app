@@ -9,21 +9,34 @@ import re
 import smtplib
 import dns.resolver
 from email.mime.text import MIMEText
+import bcrypt
 
 uri = "mongodb+srv://siriwutthesorcerer:vkd5D8LtnyWw7JCl@image-test.kv0abp0.mongodb.net/?retryWrites=true&w=majority&appName=image-test"
 # Create a new client and connect to the server
 
-# client = MongoClient(uri, server_api=ServerApi('1'))
+client = MongoClient(uri, server_api=ServerApi('1'))
 
 # # Send a ping to confirm a successful connection
-# try:
-#     client.admin.command('ping')
-#     print("Pinged your deployment. You successfully connected to MongoDB!")
-# except Exception as e:
-#     print(e)
+try:
+    client.admin.command('ping')
+    print("Pinged your deployment. You successfully connected to MongoDB!")
+except Exception as e:
+    print(e)
         
-# database = client['img']
-# collection = database['img']
+database = client['img']
+collection = database['User']
+
+new_pswd = "12345"
+salt = bcrypt.gensalt()
+byte_pswd = bytes(new_pswd, 'utf-8')
+hash_password = bcrypt.hashpw(byte_pswd, salt)
+
+collection.insert_one({
+  "user_mail" : 'a@a.com',
+  "password" : hash_password,
+  "salt" : salt,
+  "inUse" : False
+})
 
 # file = "greatwave.jpg"
 
@@ -101,8 +114,8 @@ def send_email(subject, body, sender, recipient, password):
       return True
     print("Message sent!")
 
-email = 'SiriwutTheSorcerer@gmail.com'
+# email = 'SiriwutTheSorcerer@gmail.com'
 
-if checkEmail(email):
-    print(send_email(subject, body, sender, recipient, password))
+# if checkEmail(email):
+#     print(send_email(subject, body, sender, recipient, password))
 # print(checkEmail(email))

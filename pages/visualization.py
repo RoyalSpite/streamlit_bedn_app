@@ -5,10 +5,10 @@ import datetime as dt
 from dateutil.relativedelta import relativedelta 
 import pandas as pd 
 
-@st.cache_resource
-def init_connection():
-    global img_array
-    return MongoClient({st.secrets["mongo"]["uri"]}, server_api=ServerApi('1'))
+# @st.cache_resource
+# def init_connection():
+#     global img_array
+#     return MongoClient({st.secrets["mongo"]["uri"]}, server_api=ServerApi('1'))
 
 if "client" not in st.session_state:
     st.session_state.client = init_connection()
@@ -65,10 +65,11 @@ def getTimeInterval():
     return time_list
 
 def back_to_login():
-    st.session_state.client[st.secrets["mongo"]["user"]].update_one(
-        { "user_mail" : st.session_state.login_email }, 
-        { "$set" : { "inUse" : False } } 
-    )
+    
+    # st.session_state.client[st.secrets["mongo"]["user"]].update_one(
+    #     { "user_mail" : st.session_state.login_email }, 
+    #     { "$set" : { "inUse" : False } } 
+    # )
     
     del st.session_state.login_email
     
