@@ -54,7 +54,7 @@ with st.container(border=True):
                 else : 
                     st.error("❌ อีเมลล์ / รหัสผ่านไม่ถูกต้อง")
             else:
-                # st.session_state.login_usrname = usrname
+                st.session_state.login_usrname = usrname
                 st.success("✔️ เข้าสู่ระบบสำเร็จ")
                 # st.session_state.client[st.secrets["mongo"]["user"]].update_one(
                 #     { "user_mail" : mail_input.lower() }, 
