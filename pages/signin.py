@@ -3,6 +3,7 @@ import bcrypt
 import datetime as dt
 from utils.utils import send_email, getOTP
 from email_validator import validate_email, EmailNotValidError
+from time import sleep
 
 def sigin_verify_message(otp):
     return f"""
