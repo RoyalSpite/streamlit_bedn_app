@@ -290,7 +290,8 @@ if len(date) == 2:
             data=df, file_name=file_name, mime='text/csv', 
             disabled=(len(data['img']) == 0)
         )
-        
+    
+    st.write(data["img"])
     # show image gallery
     if len(data["img"]) > 0:
         for i in range(grid_size):                    
