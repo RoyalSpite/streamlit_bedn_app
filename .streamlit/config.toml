@@ -3,6 +3,6 @@ showSidebarNavigation = false
 toolbarMode = "viewer"
 
 [theme]
-base = "dark"
+# base = "dark"
 # primaryColor = "#FFCC00"
 secondaryBackgroundColor="#00000"
