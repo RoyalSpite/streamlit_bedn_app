@@ -106,9 +106,9 @@ with st.popover("ยกเลิก", use_container_width=True):
     if login_button:
         back_to_login()
         
-with st.popover("ขอรหัส OTP ใหม่", use_container_width=True):
-    st.markdown("ต้องการขอรหัส OTP ใหม่?")
-    resent_otp = st.button("กลับไปหน้าเข้าสู่ระบบ", use_container_width=True)
+# with st.popover("ขอรหัส OTP ใหม่", use_container_width=True):
+#     st.markdown("ต้องการขอรหัส OTP ใหม่?")
+#     resent_otp = st.button("กลับไปหน้าเข้าสู่ระบบ", use_container_width=True)
     
-    if resent_otp:
-        back_to_login()
+#     if resent_otp:
+#         back_to_login()
