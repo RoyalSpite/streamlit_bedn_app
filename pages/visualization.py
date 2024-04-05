@@ -285,8 +285,9 @@ if len(date) == 2:
             df = pd.DataFrame({
                 "encroach_time" : []
             }).to_csv().encode('utf-8')
+            
         file_name = f'{data["date"]}_encroach_record.csv'
-        st.download_button("ดาวน์โหลด", 
+        st.download_button("ดาวน์โหลดประวัติการรุกล้ำ", 
             data=df, file_name=file_name, mime='text/csv', 
             disabled=(len(data['img']) == 0)
         )
