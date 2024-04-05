@@ -30,8 +30,8 @@ grid_size = 5
 @st.cache_data
 def query(date):
     
-    database = st.session_state.client[st.secrets["mongo"]["col"]]
-    collection = database[st.secrets["mongo"]["col"]]
+    # database = st.session_state.client[st.secrets["mongo"]["col"]]
+    # collection = database[st.secrets["mongo"]["col"]]
     
     _from = dt.datetime.strptime(str(date[0]), '%Y-%m-%d')
     _to = dt.datetime.strptime(str(date[1]), '%Y-%m-%d')
@@ -39,7 +39,7 @@ def query(date):
         
     criteria = { "date": {"$gte": _from, "$lte": _to } }    
     
-    return list(collection.find(criteria))
+    return list(st.session_state.client[st.secrets["mongo"]["col"]].find(criteria))
 
 def getTimeInterval():
     
@@ -291,7 +291,7 @@ if len(date) == 2:
             disabled=(len(data['img']) == 0)
         )
     
-    st.write(data["img"])
+    # st.write()
     # show image gallery
     if len(data["img"]) > 0:
         for i in range(grid_size):                    
