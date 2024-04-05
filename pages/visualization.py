@@ -22,9 +22,6 @@ if "curr_time_index" not in st.session_state:
 if "curr_page_index" not in st.session_state:
     st.session_state.curr_page_index = 0
 
-if "curr_img_len" not in st.session_state:
-    st.session_state.curr_img_len = 0
-
 if "date_filter" not in st.session_state:
     st.session_state.date_filter = []
 
@@ -83,8 +80,7 @@ def back_to_login():
 
     del st.session_state.curr_date_index
     del st.session_state.curr_time_index
-    del st.session_state.page_index
-    del st.session_state.curr_img_len
+    del st.session_state.curr_page_index
         
     st.switch_page('streamlit_app.py')
 
@@ -199,7 +195,6 @@ else:
             })
                     
             curr_date += dt.timedelta(days=1)
-
 
 if len(date) == 2:
     # visualize
