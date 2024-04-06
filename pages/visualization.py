@@ -300,7 +300,7 @@ if len(date) == 2:
     
     # show image gallery
     
-    gallery_tab, graph_tab = st.tabs(["แกลอลีรูปภาพ", "แผนภูมิ"])
+    gallery_tab, graph_tab = st.tabs(["รูปภาพ", "แผนภูมิ"])
     
     with gallery_tab:
         
@@ -380,7 +380,7 @@ if len(date) == 2:
                         c_time += dt.timedelta(seconds=10)
                                       
             else:
-                st.write(f"แสดงจำนวนการรุกล้ำของวันที่")
+                st.write(f"แสดงจำนวนการรุกล้ำของวันที่ {data['date']}")
                 
                 c_date =  dt.datetime.combine(data["date"], dt.datetime.min.time())
                 while True:
