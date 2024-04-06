@@ -12,6 +12,7 @@ import pandas as pd
 
 # if "client" not in st.session_state:
 #     st.session_state.client = init_connection()
+#     st.session_state.client = st.session_state.client[st.secrets["mongo"]["col"]]
 
 if "curr_date_index" not in st.session_state:
     st.session_state.curr_date_index = 0
@@ -29,10 +30,7 @@ grid_size = 5
 
 @st.cache_data
 def query(date):
-    
-    # database = st.session_state.client[st.secrets["mongo"]["col"]]
-    # collection = database[st.secrets["mongo"]["col"]]
-    
+
     _from = dt.datetime.strptime(str(date[0]), '%Y-%m-%d')
     _to = dt.datetime.strptime(str(date[1]), '%Y-%m-%d')
     _to = _to.replace(hour=23,minute=59,second=59,microsecond=999)
@@ -50,17 +48,22 @@ def getTimeInterval():
 
     curr_time = dt.datetime.combine(dt.date.today(), dt.time(0, 0))
     next_time = dt.datetime.combine(dt.date.today(), dt.time(0, 0))
+    i = 0
 
     while True:
 
         next_time += dt.timedelta(minutes=15)
 
-        time_list.append('-'.join((convert_time(curr_time), convert_time(next_time.time()))))
+        time_list.append({
+            'index'  : i,
+            'select' : '-'.join((convert_time(curr_time), convert_time(next_time.time())))
+        })
 
         if next_time.time() == dt.time(0,0):
             break
         else:
             curr_time = next_time
+            i += 1
 
     return time_list
 
@@ -70,8 +73,8 @@ def back_to_login():
     #     { "user_mail" : st.session_state.login_email }, 
     #     { "$set" : { "inUse" : False } } 
     # )
-    
-    del st.session_state.login_email
+    if "login_email" in st.session_state:
+        del st.session_state.login_email
     
     if "date_filter" in st.session_state:
         del st.session_state.date_filter
@@ -85,7 +88,7 @@ def back_to_login():
         
     st.switch_page('streamlit_app.py')
 
-def getTimeFromSelection(curr_date,selectTime):
+def getTimeFromSelection(selectTime, curr_date = dt.date.today()):
     
     _from, _to = [
         dt.datetime.combine(curr_date,dt.datetime.strptime(_time,"%H:%M").time()) 
@@ -97,7 +100,6 @@ def getTimeFromSelection(curr_date,selectTime):
     
     return _from, _to
     
-
 if st.session_state.get('d_back'):
     st.session_state.curr_page_index = 0
     st.session_state.curr_date_index -= 1
@@ -156,7 +158,7 @@ with st.form(key="query_select",border=True):
     
     with time_col:
         time = st.multiselect(label="เลือกช่วงเวลา",
-            placeholder="เลือกช่วงเวลา",options=getTimeInterval())
+            placeholder="เลือกช่วงเวลา",options=[ d['select'] for d in getTimeInterval() ])
 
 if len(date) == 1:
     with st.container(border=True):
@@ -164,7 +166,12 @@ if len(date) == 1:
 else:
     img_array = query(date)
     st.session_state.date_filter = list()
-    st.session_state.time_filter = time
+    st.session_state.time_filter = list( 
+        filter(lambda d: d['select'] in time ,getTimeInterval()) 
+    )
+    st.session_state.time_filter = [ d['select'] for d in list(
+        sorted(st.session_state.time_filter ,key = lambda d: d['index'])
+    )]
             
     curr_date = date[0]
     while True:
@@ -174,18 +181,23 @@ else:
             c1 = curr_date
             c2 = curr_date + dt.timedelta(days=1)
             disp_date = f'{curr_date.strftime("%d/%m")}/{curr_date.year}'
-            filtered_img = list(filter(lambda d : d["date"].date() >= c1 and d["date"].date() < c2,img_array))
-                
+            filtered_img = list(
+                filter(
+                    lambda d : (d["date"].date() >= c1 and d["date"].date() < c2)
+                    ,img_array
+                )
+            )
+                            
             # filter time
             if len(st.session_state.time_filter) > 0:
                 
-                from_time, to_time = getTimeFromSelection(curr_date ,st.session_state.time_filter[
+                from_time, to_time = getTimeFromSelection(st.session_state.time_filter[
                     st.session_state.curr_time_index
-                ])
+                ], curr_date)
                             
                 filtered_img = list(
                     filter(
-                        lambda d : (d["date"] >= from_time and d["date"] < to_time)
+                        lambda d : (d["date"].time() >= from_time.time() and d["date"].time() < to_time.time())
                         ,img_array
                     )
                 )
@@ -200,8 +212,8 @@ else:
 if len(date) == 2:
     # visualize
     # date control
-    with st.expander("กรองข้อมูล"):
-        date_grid, time_col, page_col = st.columns(3)
+    with st.expander("กรองข้อมูลเพื่อแสดงผล"):
+        date_grid, time_col = st.columns(2)
                 
         with date_grid:
             with st.container(border=True):
@@ -210,7 +222,8 @@ if len(date) == 2:
                 with b_col: st.button(key="d_back",label="⬅️", 
                     disabled=(
                         date[0] == date[1] or st.session_state.curr_date_index == 0
-                    )
+                    ),
+                    use_container_width=True
                 )
                 
                 with d_col: 
@@ -223,6 +236,7 @@ if len(date) == 2:
                 with f_col: st.button(key="d_fort",label="➡️",
                     disabled=(date[0] == date[1] 
                         or st.session_state.curr_date_index == len(st.session_state.date_filter) - 1)
+                    ,use_container_width=True
                 )
                 
         with time_col:
@@ -233,7 +247,8 @@ if len(date) == 2:
                     disabled=(
                         len(st.session_state.time_filter) == 0 or
                         st.session_state.curr_time_index == 0
-                    )
+                    ),
+                    use_container_width=True
                 )
                 with t_col: 
                     if len(st.session_state.time_filter) == 0: st.write("ไม่มี")
@@ -245,77 +260,163 @@ if len(date) == 2:
                     disabled=(
                         len(st.session_state.time_filter) == 0 or 
                         st.session_state.curr_time_index == (len(st.session_state.time_filter) - 1)
-                    )
+                    ),
+                    use_container_width=True
                 )    
-                
-        with page_col:
-            with st.container(border=True):
-                st.write("เลือกหน้า")
-                b_col, p_col, f_col = st.columns(3)
-                curr_img_len = len(st.session_state.date_filter[st.session_state.curr_date_index]['img'])
-                with b_col: 
-                    st.button(key="p_back",label="⬅️",
-                        disabled=(st.session_state.curr_page_index == 0)
-                    )
-                with p_col: 
-                    st.write(f"{st.session_state.curr_page_index + 1}/{(curr_img_len // (grid_size * grid_size)) + 1}")
-                        
-                with f_col: 
-                    st.button(key="p_fort",label="➡️",
-                        disabled=(
-                            (st.session_state.curr_page_index + 1) * (grid_size * grid_size) > 
-                            len(st.session_state.date_filter[st.session_state.curr_date_index]["img"])
-                        )
-                    )
                                             
-    # filter based on date
     data = st.session_state.date_filter[st.session_state.curr_date_index]
 
-    time_title, download_col = st.columns([5,1])
+    time_title, download_col = st.columns([0.8,0.2])
 
     with time_title:
         st.subheader(data["date"].strftime("%d-%m-%Y"),divider="rainbow")
-
+        
+    if len(data['img']) > 0:
+        df = pd.DataFrame({
+            "encroach_time" : [ d["date"].time() for d in data['img'] ],
+            "backhoe_index" : [ d["backhoe_id"] for d in data['img'] ],
+            "conf" : [ d["conf"] for d in data['img'] ]
+        })
+    else:
+        df = pd.DataFrame({
+            "encroach_time" : []
+        })
+        
     with download_col:
-        if len(data['img']) > 0:
-            df = pd.DataFrame({
-                "encroach_time" : [ d["date"].time() for d in data['img'] ]
-            }).to_csv().encode('utf-8')
-        else:
-            df = pd.DataFrame({
-                "encroach_time" : []
-            }).to_csv().encode('utf-8')
+        df = df.to_csv().encode('utf-8')
+        file_name = f'{data["date"]}'    
+        if len(st.session_state.time_filter) > 0:
+            from_time, to_time = getTimeFromSelection(st.session_state.time_filter[
+                st.session_state.curr_time_index
+            ], curr_date)
+            file_name += f'_{from_time.strftime("%H-%M")}'
+        
+        file_name += "_encroach_record.csv"
             
-        file_name = f'{data["date"]}_encroach_record.csv'
         st.download_button("ดาวน์โหลดประวัติการรุกล้ำ", 
             data=df, file_name=file_name, mime='text/csv', 
             disabled=(len(data['img']) == 0)
         )
     
-    # st.write()
     # show image gallery
-    if len(data["img"]) > 0:
-        for i in range(grid_size):                    
-            grid = st.columns(grid_size)
-            with st.container(border=True):
-                for j in range(grid_size):
-                    page_ind = st.session_state.curr_page_index * (grid_size * grid_size)
-                    index = (page_ind + (i * grid_size) + j)
-                    if (index < len(data["img"])):
-                        with grid[j]:
-                            st.image(
-                                data["img"][index]["img"],
-                                caption=data["img"][index]["date"].time()
+    
+    gallery_tab, graph_tab = st.tabs(["แกลอลีรูปภาพ", "แผนภูมิ"])
+    
+    with gallery_tab:
+        
+        if len(data["img"]) > 0:
+            _, __, _page = st.columns(3)
+            
+            with _page:
+                with st.container():
+                    st.caption("เลือกหน้า")
+                    b_col, p_col, f_col = st.columns(3)
+                    curr_img_len = len(st.session_state.date_filter[st.session_state.curr_date_index]['img'])
+                    with b_col: 
+                        st.button(key="p_back",label="⬅️",
+                            disabled=(st.session_state.curr_page_index == 0)
+                        )
+                    with p_col: 
+                        st.write(f"{st.session_state.curr_page_index + 1}/{(curr_img_len // (grid_size * grid_size)) + 1}")
+                            
+                    with f_col: 
+                        st.button(key="p_fort",label="➡️",
+                            disabled=(
+                                (st.session_state.curr_page_index + 1) * (grid_size * grid_size) > 
+                                len(st.session_state.date_filter[st.session_state.curr_date_index]["img"])
                             )
-                    else:
+                        )
+            
+            for i in range(grid_size):                    
+                grid = st.columns(grid_size)
+                with st.container(border=True):
+                    for j in range(grid_size):
+                        page_ind = st.session_state.curr_page_index * (grid_size * grid_size)
+                        index = (page_ind + (i * grid_size) + j)
+                        if (index < len(data["img"])):
+                            with grid[j]:
+                                st.image(
+                                    data["img"][index]["img"],
+                                    caption=str(data["img"][index]["date"].time())[:12]
+                                )
+                        else:
+                            break
+        else:
+            st.write("ไม่มีข้อมูล")
+            
+    with graph_tab:
+        
+        arr_time_lab = list()
+        arr_time_count = list()
+        
+        if len(data["img"]) > 0:
+            if len(st.session_state.time_filter) > 0:
+                
+                from_time, to_time = getTimeFromSelection(st.session_state.time_filter[
+                    st.session_state.curr_time_index
+                ])
+                
+                st.write(f"แสดงจำนวนการรุกล้ำ ตั้งแต่เวลา {from_time.strftime('%H:%M')} ถึง {to_time.strftime('%H:%M')}")
+                
+                c_time = from_time
+                while True:
+                    if c_time == to_time:
                         break
-    else:
-        st.write("ไม่มีข้อมูล")   
-
-                    
+                    else:
+                        arr_time_lab.append(c_time.strftime('%H:%M:%S'))                    
+                        arr_time_count.append(                        
+                            len(
+                                list(
+                                    filter(
+                                        lambda d : (d['date'].time() >= c_time.time()
+                                            and d['date'].time() < (c_time + dt.timedelta(seconds=10)).time()
+                                        )
+                                        ,data["img"]
+                                    )
+                                )
+                            )
+                        )
+                        
+                        c_time += dt.timedelta(seconds=10)
+                                      
+            else:
+                st.write(f"แสดงจำนวนการรุกล้ำของวันที่")
+                
+                c_date =  dt.datetime.combine(data["date"], dt.datetime.min.time())
+                while True:
+                    if c_date == dt.datetime.combine(data["date"], dt.datetime.min.time()) + dt.timedelta(days=1):
+                        break
+                    else:
+                        arr_time_lab.append(c_date.strftime('%H:%M'))                    
+                        arr_time_count.append(                        
+                            len(
+                                list(
+                                    filter(
+                                        lambda d : (d['date'] >= c_date
+                                            and d['date'] < (c_date + dt.timedelta(minutes=15))
+                                        )
+                                        ,data["img"]
+                                    )
+                                )
+                            )
+                        )
+                        
+                        c_date += dt.timedelta(minutes=15)
+                        
+            st.bar_chart(pd.DataFrame({
+                "time" : arr_time_lab,
+                "count" : arr_time_count
+            }), x="time", y="count")
+                
+        else:
+            st.write("ไม่มีข้อมูล")
+                   
 with st.sidebar:
-    st.subheader(st.session_state.login_email,divider="grey")
-
+    if "login_email" in st.session_state:
+        st.subheader(st.session_state.login_email,divider="grey")
+    else:
+        st.subheader("user",divider="grey")
+        
     with st.popover(label="ออกจากระบบ", use_container_width=True):
         st.markdown("ยืนยันการออกจากระบบ?")
         logout = st.button("ใช่" , use_container_width=True)
