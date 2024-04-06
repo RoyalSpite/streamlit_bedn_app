@@ -135,9 +135,7 @@ with st.form(key="query_select",border=True):
     month_range = 3
                 
     dateNow = dt.datetime.now()
-    datePrev3 = dateNow - relativedelta(months = month_range)
-    dateNext3 = dateNow
-    
+
     button_col , date_col, time_col = st.columns([0.2, 0.4, 0.4])
     
     with button_col:
@@ -151,7 +149,7 @@ with st.form(key="query_select",border=True):
         date = st.date_input(
             "เลือกวันที่",
             value = (dateNow, dateNow),
-            min_value = datePrev3,
+            min_value = dt.date(2024, 1, 1),
             max_value = dateNow,
             format = "DD.MM.YYYY",
         )
@@ -212,7 +210,7 @@ else:
 if len(date) == 2:
     # visualize
     # date control
-    with st.expander("กรองข้อมูลเพื่อแสดงผล"):
+    with st.container(border=True):
         date_grid, time_col = st.columns(2)
                 
         with date_grid:
@@ -273,7 +271,7 @@ if len(date) == 2:
         
     if len(data['img']) > 0:
         df = pd.DataFrame({
-            "encroach_time" : [ d["date"].time() for d in data['img'] ],
+            "encroach_time" : [ d["date"] for d in data['img'] ],
             "backhoe_index" : [ d["backhoe_id"] for d in data['img'] ],
             "conf" : [ d["conf"] for d in data['img'] ]
         })
