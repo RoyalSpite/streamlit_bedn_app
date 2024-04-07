@@ -94,13 +94,13 @@ with st.container(border=True):
             sleep(1)
             to_login()
                 
-    st.button("ยืนยันการแก้ไขรหัสผ่าน", use_container_width=True, type="primary",
+    st.button("ยืนยัน", use_container_width=True, type="primary",
         on_click=pswd_recover_confirm          
     )
     
-with st.popover("ยกเลิกการเปลี่ยนรหัสผ่าน", use_container_width=True):
-    st.markdown("ต้องการยกเลิกการกรอก OTP? ถ้าต้องการกู้รหัสผ่าน จะต้องขอรหัส OTP ใหม่")
-    back_to_login = st.button("ย้อนกลับ", use_container_width=True)
+with st.popover("ยกเลิก", use_container_width=True):
+    st.markdown("ต้องการยกเลิกการเปลี่ยนรหัสผ่าน?")
+    back_to_login = st.button("ยกเลิก", use_container_width=True)
     
     if back_to_login:
         to_login()
