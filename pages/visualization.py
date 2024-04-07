@@ -5,14 +5,13 @@ import datetime as dt
 from dateutil.relativedelta import relativedelta 
 import pandas as pd 
 
-# @st.cache_resource
-# def init_connection():
-#     global img_array
-#     return MongoClient({st.secrets["mongo"]["uri"]}, server_api=ServerApi('1'))
+@st.cache_resource
+def init_connection():
+    return MongoClient({st.secrets["mongo"]["uri"]}, server_api=ServerApi('1'))
 
-# if "client" not in st.session_state:
-#     st.session_state.client = init_connection()
-#     st.session_state.client = st.session_state.client[st.secrets["mongo"]["col"]]
+if "client" not in st.session_state:
+    st.session_state.client = init_connection()
+    st.session_state.client = st.session_state.client[st.secrets["mongo"]["col"]]
 
 if "curr_date_index" not in st.session_state:
     st.session_state.curr_date_index = 0
@@ -155,8 +154,9 @@ with st.form(key="query_select",border=True):
         )
     
     with time_col:
+        
         time = st.multiselect(label="เลือกช่วงเวลา",
-            placeholder="เลือกช่วงเวลา",options=[ d['select'] for d in getTimeInterval() ])
+            placeholder="เลือกช่วงเวลา ถ้าไม่ได้เลือก คือดูทั้งวัน",options=[ d['select'] for d in getTimeInterval() ])
 
 if len(date) == 1:
     with st.container(border=True):
@@ -347,6 +347,8 @@ if len(date) == 2:
         arr_time_lab = list()
         arr_time_count = list()
         
+        graph_header_text = ""
+        
         if len(data["img"]) > 0:
             if len(st.session_state.time_filter) > 0:
                 
@@ -354,7 +356,7 @@ if len(date) == 2:
                     st.session_state.curr_time_index
                 ])
                 
-                st.write(f"แสดงจำนวนการรุกล้ำ ตั้งแต่เวลา {from_time.strftime('%H:%M')} ถึง {to_time.strftime('%H:%M')}")
+                graph_header_text = f"แสดงจำนวนการรุกล้ำ ตั้งแต่เวลา {from_time.strftime('%H:%M')} ถึง {to_time.strftime('%H:%M')}"
                 
                 c_time = from_time
                 while True:
@@ -378,7 +380,7 @@ if len(date) == 2:
                         c_time += dt.timedelta(seconds=10)
                                       
             else:
-                st.write(f"แสดงจำนวนการรุกล้ำของวันที่ {data['date']}")
+                graph_header_text = f"แสดงจำนวนการรุกล้ำของวันที่ {data['date']}"
                 
                 c_date =  dt.datetime.combine(data["date"], dt.datetime.min.time())
                 while True:
@@ -400,7 +402,9 @@ if len(date) == 2:
                         )
                         
                         c_date += dt.timedelta(minutes=15)
-                        
+            
+            st.write(graph_header_text)
+                
             st.bar_chart(pd.DataFrame({
                 "time" : arr_time_lab,
                 "count" : arr_time_count
