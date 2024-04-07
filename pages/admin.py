@@ -52,7 +52,7 @@ with st.sidebar:
     to_vis = st.button("ดูผลการรุกล้ำ", use_container_width=True)
     if to_vis:
         st.session_state.login_email = "แอดมิน"
-        st.switch("pages/visualization.py")    
+        st.switch_page("pages/visualization.py")    
     
     with st.popover(label="ออกจากระบบ", use_container_width=True):
         st.markdown("ยืนยันการออกจากระบบ?")
