@@ -87,7 +87,7 @@ def back_to_login():
         
         if st.session_state.login_email == "แอดมิน":
             del st.session_state.login_email
-            st.switch_page('admin.py')
+            st.switch_page('pages/admin.py')
         else:
             del st.session_state.login_email
             st.switch_page('streamlit_app.py')
