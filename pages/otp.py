@@ -43,7 +43,7 @@ def checkOTP():
                 if st.session_state.new_page == 'signin':   
                     mail_payload = {
                         'subject' : "noreply : กู้รหัสผ่านสำเร็จ",
-                        'body' : recover_complete_message()
+                        'body' : sigin_complete_message()
                     }
                     if send_email(st.session_state.signin_payload["user_mail"], mail_payload) == "success":
                         # success
