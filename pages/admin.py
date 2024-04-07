@@ -47,7 +47,12 @@ with st.container(border=True):
                         st.button("ลบ",key=f"detete_user{i}",use_container_width=True)
                         
 with st.sidebar:
-    st.subheader("แอดมิน")
+    st.subheader("แอดมิน", divider="grey")
+    
+    to_vis = st.button("ดูผลการรุกล้ำ", use_container_width=True)
+    if to_vis:
+        st.session_state.login_email = "แอดมิน"
+        st.switch("pages/visualization.py")    
     
     with st.popover(label="ออกจากระบบ", use_container_width=True):
         st.markdown("ยืนยันการออกจากระบบ?")

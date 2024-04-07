@@ -30,7 +30,7 @@ def back_to_login():
     st.switch_page("streamlit_app.py")
     
 def checkEmail(mail):
-    
+        
     user_dict = list(st.session_state.client[st.secrets["mongo"]["user"]].find({
         'user_mail' : mail
     }))

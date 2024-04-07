@@ -72,8 +72,6 @@ def back_to_login():
     #     { "user_mail" : st.session_state.login_email }, 
     #     { "$set" : { "inUse" : False } } 
     # )
-    if "login_email" in st.session_state:
-        del st.session_state.login_email
     
     if "date_filter" in st.session_state:
         del st.session_state.date_filter
@@ -84,8 +82,18 @@ def back_to_login():
     del st.session_state.curr_date_index
     del st.session_state.curr_time_index
     del st.session_state.curr_page_index
+    
+    if "login_email" in st.session_state:
         
-    st.switch_page('streamlit_app.py')
+        if st.session_state.login_email == "แอดมิน":
+            del st.session_state.login_email
+            st.switch_page('admin.py')
+        else:
+            del st.session_state.login_email
+            st.switch_page('streamlit_app.py')
+            
+    else:
+        st.switch_page('streamlit_app.py')
 
 def getTimeFromSelection(selectTime, curr_date = dt.date.today()):
     
@@ -414,14 +422,29 @@ if len(date) == 2:
             st.write("ไม่มีข้อมูล")
                    
 with st.sidebar:
+    
+    logout_text = ""
     if "login_email" in st.session_state:
         st.subheader(st.session_state.login_email,divider="grey")
+        if st.session_state.login_email == "แอดมิน":
+            logout_text = "กลับหน้าแอดมิน"
+        else:
+            logout_text = "ออกจากระบบ"
     else:
         st.subheader("user",divider="grey")
-        
-    with st.popover(label="ออกจากระบบ", use_container_width=True):
-        st.markdown("ยืนยันการออกจากระบบ?")
+        logout_text = "ออกจากระบบ"
+    
+    with st.popover(label=logout_text, use_container_width=True):
+        if "login_email" in st.session_state:
+            if st.session_state.login_email == "แอดมิน":
+                st.markdown("กลับหน้าแอดมิน?")
+            else:
+                st.markdown("ยืนยันการออกจากระบบ?")
+        else:
+            st.markdown("ยืนยันการออกจากระบบ?")
+            
         logout = st.button("ใช่" , use_container_width=True)
+        
         
         if logout:
             back_to_login()
