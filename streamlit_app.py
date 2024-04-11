@@ -34,7 +34,7 @@ def authentication():
                 st.session_state.aut_complete = 0
     del user_dict
 
-with st.form("signin",border=True):
+with st.form(key="login",border=True):
     
     mail_input = st.text_input("กรอกอีเมล")
     
@@ -49,15 +49,22 @@ with st.form("signin",border=True):
                 del st.session_state.aut_complete
                 st.switch_page("pages/admin.py")
             elif st.session_state.aut_complete != 0:
-                st.error("❌ อีเมล / รหัสผ่านไม่ถูกต้อง")
+                if st.session_state.aut_complete == 3:
+                    st.error("❌ ไม่สามารถเข้าสู่ระบบได้ เนื่องจากผู้ใช้งานนี้กำลังเข้าสู่ระบบ")
+                else : 
+                    st.error("❌ อีเมล / รหัสผ่านไม่ถูกต้อง")
             else:
                 st.success("✔️ เข้าสู่ระบบสำเร็จ")
+                # st.session_state.client[st.secrets["mongo"]["user"]].update_one(
+                #     { "user_mail" : mail_input.lower() }, 
+                #     { "$set" : { "inUse" : True } } 
+                # )
                 sleep(1)
                 st.session_state.login_email = mail_input.lower()
                 del st.session_state.aut_complete
                 st.switch_page("pages/visualization.py")
     
-    login_submit = st.submit_button("เข้าสู่ระบบ", use_container_width=True, 
+    st.form_submit_button("เข้าสู่ระบบ", use_container_width=True, 
         type="primary", on_click=authentication
     )
     
