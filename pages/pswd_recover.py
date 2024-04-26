@@ -77,7 +77,7 @@ with st.container(border=True):
         elif st.session_state.recover == 4:
             st.error("❌ ไม่สามารถส่งรหัส OTP ได้ กรุณาลองใหม่อีกครั้ง")
 
-    recovery = st.button("ค้นหาอีเมลล์", use_container_width=True, 
+    recovery = st.button("ค้นหาอีเมล", use_container_width=True, 
         type="primary", on_click=checkEmailInput
     )
     
