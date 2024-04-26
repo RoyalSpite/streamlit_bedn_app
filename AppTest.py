@@ -24,25 +24,25 @@ except Exception as e:
     print(e)
         
 database = client['img']
-collection = database['User']
+collection = database['img']
 
 new_pswd = "12345"
 salt = bcrypt.gensalt()
 byte_pswd = bytes(new_pswd, 'utf-8')
 hash_password = bcrypt.hashpw(byte_pswd, salt)
 
-collection.insert_one({
-  "user_mail" : 'a@a.com',
-  "password" : hash_password,
-  "salt" : salt,
-  "inUse" : False
-})
+# collection.insert_one({
+#   "user_mail" : 'a@a.com',
+#   "password" : hash_password,
+#   "salt" : salt,
+#   "inUse" : False
+# })
 
-# file = "greatwave.jpg"
+file = "bb030bbc-0bf2-4ac6-88f6-8ae45171d25e.jfif"
 
-# im = Image.open(file)
-# image_bytes = io.BytesIO()
-# im.save(image_bytes, format='JPEG')
+im = Image.open(file)
+image_bytes = io.BytesIO()
+im.save(image_bytes, format='JPEG')
 
 # # payload = {   
 # #     "day" : date.today().day,
@@ -51,10 +51,12 @@ collection.insert_one({
 # #     "img" : image_bytes.getvalue()
 # # }
 
-# payload = {
-#     "date" : dt.datetime.today().replace(microsecond=0),
-#     "img" : image_bytes.getvalue()
-# }
+payload = {
+    "date" : dt.datetime.today().replace(month=4,day=5,minute=4,hour=13,microsecond=0),
+    "img" : image_bytes.getvalue(),
+    "backhoe_id" : 6,
+    "conf" : 0.96
+}
 
 # image_id = collection.insert_one(payload).inserted_id
 

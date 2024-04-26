@@ -6,13 +6,13 @@ from dateutil.relativedelta import relativedelta
 import pandas as pd
 import altair as alt
 
-# @st.cache_resource
-# def init_connection():
-#     return MongoClient({st.secrets["mongo"]["uri"]}, server_api=ServerApi('1'))
+@st.cache_resource
+def init_connection():
+    return MongoClient({st.secrets["mongo"]["url"]}, server_api=ServerApi('1'))
 
-# if "client" not in st.session_state:
-#     st.session_state.client = init_connection()
-#     st.session_state.client = st.session_state.client[st.secrets["mongo"]["col"]]
+if "client" not in st.session_state:
+    st.session_state.client = init_connection()
+    st.session_state.client = st.session_state.client[st.secrets["mongo"]["col"]]
 
 if "curr_date_index" not in st.session_state:
     st.session_state.curr_date_index = 0
@@ -83,11 +83,6 @@ def getTimeInterval():
 
 def back_to_login():
     
-    # st.session_state.client[st.secrets["mongo"]["user"]].update_one(
-    #     { "user_mail" : st.session_state.login_email }, 
-    #     { "$set" : { "inUse" : False } } 
-    # )
-    
     if "date_filter" in st.session_state:
         del st.session_state.date_filter
     
@@ -105,8 +100,7 @@ def back_to_login():
             st.switch_page('pages/admin.py')
         else:
             del st.session_state.login_email
-            st.switch_page('streamlit_app.py')
-            
+            st.switch_page('streamlit_app.py')  
     else:
         st.switch_page('streamlit_app.py')
 
@@ -226,13 +220,17 @@ with daily_tab:
                 # filter time
                 if len(st.session_state.time_filter) > 0:
                     
-                    from_time, to_time = getTimeFromSelection(st.session_state.time_filter[
-                        st.session_state.curr_time_index
+                    from_time, to_time = getTimeFromSelection(
+                        st.session_state.time_filter[
+                            st.session_state.curr_time_index
                     ], curr_date)
                                 
                     filtered_img = list(
                         filter(
-                            lambda d : (d["date"].time() >= from_time.time() and d["date"].time() < to_time.time())
+                            lambda d : (
+                                d["date"].time() >= from_time.time() 
+                                and d["date"].time() < to_time.time()
+                            )
                             ,img_array
                         )
                     )
@@ -244,7 +242,9 @@ with daily_tab:
                         
                 curr_date += dt.timedelta(days=1)
 
-    if len(date) == 2:
+    if len(date) < 2:
+        st.write("ไม่มีข้อมูล")
+    else:
         # visualize
         # date control
         with st.container(border=True):
@@ -270,7 +270,9 @@ with daily_tab:
                         
                     with f_col: st.button(key="d_fort",label="➡️",
                         disabled=(date[0] == date[1] 
-                            or st.session_state.curr_date_index == len(st.session_state.date_filter) - 1)
+                            or st.session_state.curr_date_index == len(
+                                st.session_state.date_filter) - 1
+                            )
                         ,use_container_width=True
                     )
                     
@@ -289,12 +291,15 @@ with daily_tab:
                         if len(st.session_state.time_filter) == 0: st.write("ไม่มี")
                         else: 
                             st.write(
-                                st.session_state.time_filter[st.session_state.curr_time_index]
+                                st.session_state.time_filter[
+                                    st.session_state.curr_time_index
+                                ]
                             )
                     with f_col: st.button(key="t_fort",label="➡️", 
                         disabled=(
                             len(st.session_state.time_filter) == 0 or 
-                            st.session_state.curr_time_index == (len(st.session_state.time_filter) - 1)
+                            st.session_state.curr_time_index == (
+                                len(st.session_state.time_filter) - 1)
                         ),
                         use_container_width=True
                     )    
@@ -321,9 +326,11 @@ with daily_tab:
             df = df.to_csv(index=False).encode('utf-8')
             file_name = f'{data["date"]}'    
             if len(st.session_state.time_filter) > 0:
-                from_time, to_time = getTimeFromSelection(st.session_state.time_filter[
-                    st.session_state.curr_time_index
-                ], curr_date)
+                from_time, to_time = getTimeFromSelection(
+                    st.session_state.time_filter[
+                        st.session_state.curr_time_index
+                    ], curr_date
+                )
                 file_name += f'_{from_time.strftime("%H-%M")}'
             
             file_name += "_encroach_record.csv"
@@ -346,19 +353,32 @@ with daily_tab:
                     with st.container():
                         st.caption("เลือกหน้า")
                         b_col, p_col, f_col = st.columns(3)
-                        curr_img_len = len(st.session_state.date_filter[st.session_state.curr_date_index]['img'])
+                        curr_img_len = len(
+                            st.session_state.date_filter[
+                                st.session_state.curr_date_index
+                            ]['img'])
+                        
                         with b_col: 
                             st.button(key="p_back",label="⬅️",
                                 disabled=(st.session_state.curr_page_index == 0)
                             )
+                            
                         with p_col: 
-                            st.write(f"{st.session_state.curr_page_index + 1}/{(curr_img_len // (grid_size * grid_size)) + 1}")
+                            st.write(
+                                (st.session_state.curr_page_index + 1)+"/"
+                                +((curr_img_len // (grid_size * grid_size)) + 1)
+                            )
                                 
                         with f_col: 
                             st.button(key="p_fort",label="➡️",
                                 disabled=(
-                                    (st.session_state.curr_page_index + 1) * (grid_size * grid_size) > 
-                                    len(st.session_state.date_filter[st.session_state.curr_date_index]["img"])
+                                (
+                                    (st.session_state.curr_page_index + 1) 
+                                    * (grid_size * grid_size)
+                                 ) > 
+                                    len(st.session_state.date_filter[
+                                        st.session_state.curr_date_index]["img"]
+                                    )
                                 )
                             )
                 
@@ -366,7 +386,9 @@ with daily_tab:
                     grid = st.columns(grid_size)
                     with st.container(border=True):
                         for j in range(grid_size):
-                            page_ind = st.session_state.curr_page_index * (grid_size * grid_size)
+                            page_ind = (
+                                st.session_state.curr_page_index * (grid_size * grid_size)
+                            )
                             index = (page_ind + (i * grid_size) + j)
                             if (index < len(data["img"])):
                                 with grid[j]:
@@ -376,8 +398,6 @@ with daily_tab:
                                     )
                             else:
                                 break
-            else:
-                st.write("ไม่มีข้อมูล")
                 
         with graph_tab:
             
@@ -393,20 +413,26 @@ with daily_tab:
                         st.session_state.curr_time_index
                     ])
                     
-                    graph_header_text = f"แสดงจำนวนการรุกล้ำ ตั้งแต่เวลา {from_time.strftime('%H:%M')} ถึง {to_time.strftime('%H:%M')}"
+                    graph_header_text = ("แสดงจำนวนการรุกล้ำ ตั้งแต่เวลา" +
+                        from_time.strftime('%H:%M') + " ถึง " + to_time.strftime('%H:%M')
+                    )
                     
                     c_time = from_time
                     while True:
                         if c_time == to_time:
                             break
                         else:
-                            arr_time_lab.append(c_time.strftime('%H:%M:%S'))                    
+                            arr_time_lab.append(
+                                c_time.strftime('%H:%M:%S')
+                            )                    
+                            
                             arr_time_count.append(                        
                                 len(
                                     list(
                                         filter(
                                             lambda d : (d['date'].time() >= c_time.time()
-                                                and d['date'].time() < (c_time + dt.timedelta(seconds=10)).time()
+                                                and d['date'].time() < (
+                                                    c_time + dt.timedelta(seconds=10)).time()
                                             )
                                             ,data["img"]
                                         )
@@ -421,7 +447,8 @@ with daily_tab:
                     
                     c_date =  dt.datetime.combine(data["date"], dt.datetime.min.time())
                     while True:
-                        if c_date == dt.datetime.combine(data["date"], dt.datetime.min.time()) + dt.timedelta(days=1):
+                        if c_date == dt.datetime.combine(
+                                data["date"], dt.datetime.min.time()) + dt.timedelta(days=1):
                             break
                         else:
                             arr_time_lab.append(c_date.strftime('%H:%M'))                    
@@ -430,7 +457,9 @@ with daily_tab:
                                     list(
                                         filter(
                                             lambda d : (d['date'] >= c_date
-                                                and d['date'] < (c_date + dt.timedelta(minutes=15))
+                                                and d['date'] < (
+                                                    c_date + dt.timedelta(minutes=15)
+                                                )
                                             )
                                             ,data["img"]
                                         )
@@ -525,6 +554,8 @@ with months_tab:
             years = _years,
             months=[getMonthsSelect()[first_key], getMonthsSelect()[last_key]]    
         )
+        
+        print(month_array)
         
         # group months
         for i in range(len(month_array) - 1):

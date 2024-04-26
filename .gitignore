@@ -3,3 +3,5 @@ AppTest.py
 .devcontainer
 streamlit_playground.py
 pages/streamlit_sub.py
+img_schema.json
+usr_schema.json

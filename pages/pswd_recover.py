@@ -60,7 +60,7 @@ st.subheader("กู้คืนรหัสผ่าน")
 
 with st.container(border=True):
     
-    search_mail = st.text_input("ค้นหาอีเมลล์")
+    search_mail = st.text_input("ค้นหาอีเมล")
     
     if 'recover' in st.session_state:
         if st.session_state.recover == 0:

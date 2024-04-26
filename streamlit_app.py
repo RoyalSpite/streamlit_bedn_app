@@ -6,7 +6,7 @@ import bcrypt
 
 @st.cache_resource
 def init_connection():
-    return MongoClient({st.secrets["mongo"]["uri"]}, server_api=ServerApi('1'))
+    return MongoClient({st.secrets["mongo"]["url"]}, server_api=ServerApi('1'))
 
 if "client" not in st.session_state:
     st.session_state.client = init_connection()
@@ -55,10 +55,6 @@ with st.form(key="login",border=True):
                     st.error("❌ อีเมล / รหัสผ่านไม่ถูกต้อง")
             else:
                 st.success("✔️ เข้าสู่ระบบสำเร็จ")
-                # st.session_state.client[st.secrets["mongo"]["user"]].update_one(
-                #     { "user_mail" : mail_input.lower() }, 
-                #     { "$set" : { "inUse" : True } } 
-                # )
                 sleep(1)
                 st.session_state.login_email = mail_input.lower()
                 del st.session_state.aut_complete

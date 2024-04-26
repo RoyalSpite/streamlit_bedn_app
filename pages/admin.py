@@ -1,7 +1,5 @@
 import streamlit as st
 
-st.subheader("จัดการบัญชี", divider='gray')
-
 def back_to_login():
     del st.session_state.user_set
     st.switch_page("streamlit_app.py")
@@ -29,7 +27,7 @@ else:
             st.rerun()
             break
 
-
+st.subheader("จัดการบัญชี", divider='gray')
 
 with st.container(border=True):
     if len(st.session_state.user_set) == 0:
