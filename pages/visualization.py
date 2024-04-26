@@ -37,7 +37,7 @@ def query_date(date):
         
     criteria = { "date": {"$gte": _from, "$lte": _to } }    
     
-    return list(st.session_state.client[st.secrets["mongo"]["col"]].find(criteria))
+    return list(st.session_state.client[st.secrets["mongo"]["img"]].find(criteria))
 
 @st.cache_data
 def query_month(years,months=0):
@@ -51,7 +51,7 @@ def query_month(years,months=0):
         
     criteria = { "date": {"$gte": _from, "$lt": _to } }    
     
-    return list(st.session_state.client[st.secrets["mongo"]["col"]].find(criteria))
+    return list(st.session_state.client[st.secrets["mongo"]["img"]].find(criteria))
 
 def getTimeInterval():
     
